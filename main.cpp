@@ -231,11 +231,6 @@ void rejestracja( vector <Uzytkownik> &uzytkownicy)
 }
 void logowanie ( vector <Uzytkownik> &uzytkownicy)
 {
-    if (uzytkownicy.size()>0)
-    {
-        cout<<"haslo uzytkownika zero "<<uzytkownicy[0].haslo<<endl;
-        system("PAUSE");
-    }
     string login, haslo;
     int indeksUzytkownika=0, proba=0;
 
@@ -352,7 +347,6 @@ void wprowadzanieDanychAdresata (vector <Adresat> &adresaci)
     cin >> adresat.email;
     cout << "Podaj adres Adresata: ";
     cin >> adresat.adres;
-    system("PAUSE");
     if (adresaci.size()==0 || (adresaci.size()==1 && adresaci[0].id>1) )
     {
         adresat.id=1;
@@ -400,7 +394,6 @@ void sprawdzaniePoImieniu (vector <Adresat> &adresaci)
 
         }
     }
-    system("PAUSE");
 }
 void sprawdzaniePoNazwisku (vector <Adresat> &adresaci)
 {
@@ -421,7 +414,6 @@ void sprawdzaniePoNazwisku (vector <Adresat> &adresaci)
 
         }
     }
-    system("PAUSE");
 }
 void wypisanieAdresatow (vector <Adresat> &adresaci)
 {
@@ -435,8 +427,6 @@ void wypisanieAdresatow (vector <Adresat> &adresaci)
         cout << "Adres Adresata: " <<adresaci[i].adres << endl;
         cout << "E-mail Adresata: " <<adresaci[i].email << endl;
         cout << endl << endl;
-
-
     }
     system("PAUSE");
 }
@@ -568,6 +558,7 @@ void usuwanieAdresata(vector <Adresat> &adresaci)
                 if (adresaci[i].id==idDoUsunieciaAdresata)
                 {
                     liczbaPorzadkowaDlaUsunieciaAdresata=i;
+                    adresaci.erase(adresaci.begin()+liczbaPorzadkowaDlaUsunieciaAdresata);
                 }
             }
 
@@ -673,11 +664,7 @@ void zmianaHaslaUzytkownika (string login, vector <Uzytkownik> &uzytkownicy)
             }
             else
             {
-                cout<<"Haslo uzytkownika "<<indeksDoZmianyHasla<<" przed zmian¹ "<<uzytkownicy[indeksDoZmianyHasla].haslo<<endl;
-                system("PAUSE");
                 uzytkownicy[indeksDoZmianyHasla].haslo=haslo;
-                cout<<"Haslo uzytkownika "<<indeksDoZmianyHasla<<" po zmianie "<<uzytkownicy[indeksDoZmianyHasla].haslo<<endl;
-                system("PAUSE");
                 //zapisywanieUzytkownikowDoPliku(uzytkownicy);
                 liczebnikDlaPodawaniaHasla=1;
 
