@@ -17,7 +17,7 @@ struct Uzytkownik
 };
 struct Adresat
 {
-    int id = 0;
+    int id = 0, idOdUzytkownika=0;
     string imie = "", nazwisko = "", numerTelefonu = "", email = "", adres = "";
 };
 bool porownaj(Adresat i, Adresat j)
@@ -27,18 +27,18 @@ bool porownaj(Adresat i, Adresat j)
 void rejestracja( vector <Uzytkownik> &uzytkownicy);
 void logowanie ( vector <Uzytkownik> &uzytkownicy);
 void zapisywanieUzytkownikowDoPliku( vector <Uzytkownik> &uzytkownicy);
-void automatyczneWczytyawnieUzytkownikow( vector <Uzytkownik> &uzytkownicy);
-void panelUzytkownika(string login, vector <Uzytkownik> &uzytkownicy);
-void menuKsiazkiAdresowej(string login, vector <Uzytkownik> &uzytkownicy);
-void wprowadzanieDanychAdresata (vector <Adresat> &adresaci);
-void sprawdzaniePoImieniu ( vector <Adresat> &adresaci);
-void sprawdzaniePoNazwisku (vector <Adresat> &adresaci);
-void wypisanieAdresatow ( vector <Adresat> &adresaci);
-void zapisywanieAdresatowDoPliku(vector <Adresat> &adresaci, string login);
-void automatyczneWczytyawnieAdresatow(vector <Adresat> &adresaci, string login);
-void usuwanieAdresata(vector <Adresat> &adresaci);
-void zmianaDanychAdresata(vector <Adresat> &adresaci);
-void zmianaHaslaUzytkownika (string login, vector <Uzytkownik> &uzytkownicy);
+void automatyczneWczytyawnieUzytkownikow(vector <Uzytkownik> &uzytkownicy);
+void panelUzytkownika(vector <Uzytkownik> &uzytkownicy, int idUzytkownika);
+void menuKsiazkiAdresowej(vector <Uzytkownik> &uzytkownicy, int idUzytkownika);
+void wprowadzanieDanychAdresata (vector <Adresat> &adresaci, int idUzytkownika);
+void sprawdzaniePoImieniu ( vector <Adresat> &adresaci, int idUzytkownika);
+void sprawdzaniePoNazwisku (vector <Adresat> &adresaci, int idUzytkownika);
+void wypisanieAdresatow ( vector <Adresat> &adresaci, int idUzytkownika);
+void zapisywanieAdresatowDoPliku(vector <Adresat> &adresaci,int id);
+void automatyczneWczytyawnieAdresatow(vector <Adresat> &adresaci);
+void usuwanieAdresata(vector <Adresat> &adresaci, int idUzytkownika);
+void zmianaDanychAdresata(vector <Adresat> &adresaci, int idUzytkownika);
+void zmianaHaslaUzytkownika (vector <Uzytkownik> &uzytkownicy, int idUzytkownika);
 string zamianaNaString(int num)
 {
     string str = to_string(num);
@@ -161,7 +161,7 @@ void automatyczneWczytyawnieUzytkownikow(vector <Uzytkownik> &uzytkownicy)
         }
     }
 }
-void panelUzytkownika(string login, vector <Uzytkownik> &uzytkownicy)
+void panelUzytkownika(vector <Uzytkownik> &uzytkownicy, int idUzytkownika)
 {
     char wybor;
   while(1)
@@ -176,11 +176,11 @@ void panelUzytkownika(string login, vector <Uzytkownik> &uzytkownicy)
 
         if (wybor == '1')
         {
-            menuKsiazkiAdresowej(login, uzytkownicy);
+            menuKsiazkiAdresowej(uzytkownicy, idUzytkownika);
         }
         else if (wybor == '2' )
         {
-            zmianaHaslaUzytkownika(login, uzytkownicy);
+            zmianaHaslaUzytkownika (uzytkownicy, idUzytkownika);
             zapisywanieUzytkownikowDoPliku(uzytkownicy);
         }
 
@@ -233,6 +233,7 @@ void logowanie ( vector <Uzytkownik> &uzytkownicy)
 {
     string login, haslo;
     int indeksUzytkownika=0, proba=0;
+    bool potwierdzenieWystepowaniaUzytkownika=0;
 
     do
     {
@@ -246,20 +247,22 @@ void logowanie ( vector <Uzytkownik> &uzytkownicy)
             {
                 if(uzytkownicy[i].login==login)
                 {
-                    indeksUzytkownika=i+1;
+                    indeksUzytkownika=i;
+                    potwierdzenieWystepowaniaUzytkownika=1;
+
                 }
             }
         }
-        if (indeksUzytkownika==0)
+        if (potwierdzenieWystepowaniaUzytkownika==0)
         {
             cout<<"Bledne dane"<<endl;
             proba+=1;
         }
         else
         {
-            if(uzytkownicy[indeksUzytkownika-1].login==login && uzytkownicy[indeksUzytkownika-1].haslo==haslo)
+            if(uzytkownicy[indeksUzytkownika].login==login && uzytkownicy[indeksUzytkownika].haslo==haslo)
             {
-                panelUzytkownika(login,uzytkownicy);
+                panelUzytkownika(uzytkownicy, uzytkownicy[indeksUzytkownika].id);
             }
             else
             {
@@ -275,14 +278,14 @@ void logowanie ( vector <Uzytkownik> &uzytkownicy)
 }
 
 
-void menuKsiazkiAdresowej(string login, vector <Uzytkownik> &uzytkownicy)
+void menuKsiazkiAdresowej(vector <Uzytkownik> &uzytkownicy, int idUzytkownika)
 {
     char wybor;
     vector <Adresat> adresaci;
     string daneAdresoweZnajomego, skladowaDanychAdresowychZnajomego;
 
 
-    automatyczneWczytyawnieAdresatow(adresaci, login);
+    automatyczneWczytyawnieAdresatow(adresaci);
 
     while(1)
     {
@@ -299,42 +302,43 @@ void menuKsiazkiAdresowej(string login, vector <Uzytkownik> &uzytkownicy)
 
         if (wybor == '1')
         {
-            wprowadzanieDanychAdresata(adresaci);
-            zapisywanieAdresatowDoPliku(adresaci, login);
+            wprowadzanieDanychAdresata(adresaci,idUzytkownika);
+            zapisywanieAdresatowDoPliku(adresaci,idUzytkownika);
 
         }
         else if (wybor == '2' )
         {
-            sprawdzaniePoImieniu (adresaci);
+            sprawdzaniePoImieniu (adresaci, idUzytkownika);
         }
         else if (wybor == '3' )
         {
-            sprawdzaniePoNazwisku (adresaci);
+            sprawdzaniePoNazwisku (adresaci, idUzytkownika);
         }
         else if (wybor == '4' )
         {
-            wypisanieAdresatow(adresaci);
+            wypisanieAdresatow(adresaci, idUzytkownika);
         }
         else if (wybor == '5' )
         {
-            usuwanieAdresata(adresaci);
-            zapisywanieAdresatowDoPliku(adresaci, login);
+            usuwanieAdresata(adresaci, idUzytkownika);
+            zapisywanieAdresatowDoPliku(adresaci, idUzytkownika);
         }
         else if (wybor == '6' )
         {
-            zmianaDanychAdresata(adresaci);
-            zapisywanieAdresatowDoPliku(adresaci, login);
+            zmianaDanychAdresata(adresaci, idUzytkownika);
+            zapisywanieAdresatowDoPliku(adresaci, idUzytkownika);
         }
 
         else if (wybor == '9' )
         {
-            zapisywanieAdresatowDoPliku(adresaci, login);
+            zapisywanieAdresatowDoPliku(adresaci, idUzytkownika);
             main();
         }
     }
 }
-void wprowadzanieDanychAdresata (vector <Adresat> &adresaci)
+void wprowadzanieDanychAdresata (vector <Adresat> &adresaci, int idUzytkownika)
 {
+    cout<< "ID izutkownika: "<<idUzytkownika<<endl;
     int liczbaSprawdzajacaDojscieDoKoncaPetli=0;
     Adresat adresat;
     cout << "Podaj imie Adresata: ";
@@ -346,7 +350,11 @@ void wprowadzanieDanychAdresata (vector <Adresat> &adresaci)
     cout << "Podaj email Adresata: ";
     cin >> adresat.email;
     cout << "Podaj adres Adresata: ";
-    cin >> adresat.adres;
+    cin.sync();
+    cin.ignore();
+    getline(cin, adresat.adres);
+
+
     if (adresaci.size()==0 || (adresaci.size()==1 && adresaci[0].id>1) )
     {
         adresat.id=1;
@@ -371,18 +379,23 @@ void wprowadzanieDanychAdresata (vector <Adresat> &adresaci)
         }*/
     }
 
+adresat.idOdUzytkownika=idUzytkownika;
 
     adresaci.push_back(adresat);
+     cin.sync();
+   cin.ignore();
     sort(adresaci.begin(), adresaci.end(), porownaj);
 }
-void sprawdzaniePoImieniu (vector <Adresat> &adresaci)
+void sprawdzaniePoImieniu (vector <Adresat> &adresaci,int idUzytkownika)
 {
     string imie;
     cout << "Podaj imie znajomego: ";
     cin >> imie;
     for (int i=0; i< adresaci.size(); i++)
     {
-        if ( adresaci[i].imie == imie)
+        if(adresaci[i].idOdUzytkownika==idUzytkownika)
+        {
+            if ( adresaci[i].imie == imie)
         {
             cout << "ID Adresata: " << adresaci[i].id << endl;
             cout << "Imie Adresata: " <<adresaci[i].imie << endl;
@@ -394,14 +407,20 @@ void sprawdzaniePoImieniu (vector <Adresat> &adresaci)
 
         }
     }
+    }
+
+    system("PAUSE");
 }
-void sprawdzaniePoNazwisku (vector <Adresat> &adresaci)
+void sprawdzaniePoNazwisku (vector <Adresat> &adresaci, int idUzytkownika)
 {
     string nazwisko;
     cout << "Podaj nazwisko znajomego: ";
     cin >> nazwisko;
     for (int i=0; i< adresaci.size(); i++)
     {
+        if (adresaci[i].idOdUzytkownika==idUzytkownika)
+       {
+
         if ( adresaci[i].nazwisko == nazwisko)
         {
             cout << "ID Adresata: " << adresaci[i].id << endl;
@@ -413,45 +432,48 @@ void sprawdzaniePoNazwisku (vector <Adresat> &adresaci)
             cout << endl << endl;
 
         }
+       }
     }
+    system("PAUSE");
 }
-void wypisanieAdresatow (vector <Adresat> &adresaci)
+void wypisanieAdresatow (vector <Adresat> &adresaci, int idUzytkownika)
 {
 
     for (int i=0; i< adresaci.size(); i++)
     {
-        cout << "ID Adresata: " << adresaci[i].id << endl;
+        if(adresaci[i].idOdUzytkownika==idUzytkownika)
+        {
+            cout << "ID Adresata: " << adresaci[i].id << endl;
         cout << "Imie Adresata: " <<adresaci[i].imie << endl;
         cout << "nazwisko Adresata: " <<adresaci[i].nazwisko << endl;
         cout << "Numer Telefonu Adresata: " <<adresaci[i].numerTelefonu << endl;
         cout << "Adres Adresata: " <<adresaci[i].adres << endl;
         cout << "E-mail Adresata: " <<adresaci[i].email << endl;
         cout << endl << endl;
+        }
     }
     system("PAUSE");
 }
-void zapisywanieAdresatowDoPliku(vector <Adresat> &adresaci, string login)
+void zapisywanieAdresatowDoPliku(vector <Adresat> &adresaci, int idUzytkownika)
 {
-    string nazwaPliku="";
     Adresat adresat;
     string daneAdresata="";
     // fstream ksiazkaAdresowa;
-    nazwaPliku+="KsiazkaAdresowa";
-    nazwaPliku+=login;
-    nazwaPliku+=".txt";
     ofstream ksiazkaAdresowa;
     if (adresaci.size()==0)
     {
-        ksiazkaAdresowa.open(nazwaPliku,ios::out | ios::trunc);
+        ksiazkaAdresowa.open("KsiazkaAdresowa.txt",ios::out | ios::trunc);
         ksiazkaAdresowa.close();
     }
     else if(adresaci.size()>0)
     {
-        ksiazkaAdresowa.open(nazwaPliku,ios::out | ios::trunc);
+        ksiazkaAdresowa.open("KsiazkaAdresowa.txt",ios::out | ios::trunc);
         ksiazkaAdresowa.close();
-        ksiazkaAdresowa.open(nazwaPliku,ios::out| ios::app);
+        ksiazkaAdresowa.open("KsiazkaAdresowa.txt",ios::out| ios::app);
         for(int i=0; i<=adresaci.size()-1; i++)
         {
+            daneAdresata+=zamianaNaString(adresaci[i].idOdUzytkownika);
+            daneAdresata+="|";
             daneAdresata+=zamianaNaString(adresaci[i].id);
             daneAdresata+="|";
             daneAdresata+=adresaci[i].imie;
@@ -471,16 +493,13 @@ void zapisywanieAdresatowDoPliku(vector <Adresat> &adresaci, string login)
     }
     ksiazkaAdresowa.close();
 }
-void automatyczneWczytyawnieAdresatow(vector <Adresat> &adresaci, string login)
+void automatyczneWczytyawnieAdresatow(vector <Adresat> &adresaci)
 {
     Adresat adresat;
     int liczebnikDlaWprowadzaniaTypuDanychAdresata=1;
-    string linia, skladowaDanychAdresta="", nazwaPliku="";
-    nazwaPliku+="KsiazkaAdresowa";
-    nazwaPliku+=login;
-    nazwaPliku+=".txt";
+    string linia, skladowaDanychAdresta="", idPobieranyZLinii="";
     fstream ksiazkaAdresowa;
-    ksiazkaAdresowa.open (nazwaPliku,ios::in);
+    ksiazkaAdresowa.open ("KsiazkaAdresowa.txt",ios::in);
     if (ksiazkaAdresowa.good()== true)
     {
 
@@ -488,57 +507,62 @@ void automatyczneWczytyawnieAdresatow(vector <Adresat> &adresaci, string login)
         {
             for( int i=0; i<=linia.size(); i++)
             {
-                if(linia[i]!='|' & i!=linia.size())
+                    if(linia[i]!='|' & i!=linia.size())
                 {
                     skladowaDanychAdresta+=linia[i];
-
                 }
                 else if (linia[i]=='|' && liczebnikDlaWprowadzaniaTypuDanychAdresata==1)
                 {
-                    adresat.id=zamianaStringNaInt(skladowaDanychAdresta);
+                    adresat.idOdUzytkownika=zamianaStringNaInt(skladowaDanychAdresta);
                     skladowaDanychAdresta="";
                     liczebnikDlaWprowadzaniaTypuDanychAdresata=2;
                 }
-                else if (linia[i]=='|' & liczebnikDlaWprowadzaniaTypuDanychAdresata==2)
+                else if (linia[i]=='|' && liczebnikDlaWprowadzaniaTypuDanychAdresata==2)
                 {
-                    adresat.imie=skladowaDanychAdresta;
+                    adresat.id=zamianaStringNaInt(skladowaDanychAdresta);
                     skladowaDanychAdresta="";
                     liczebnikDlaWprowadzaniaTypuDanychAdresata=3;
                 }
                 else if (linia[i]=='|' & liczebnikDlaWprowadzaniaTypuDanychAdresata==3)
                 {
-                    adresat.nazwisko=skladowaDanychAdresta;
+                    adresat.imie=skladowaDanychAdresta;
                     skladowaDanychAdresta="";
                     liczebnikDlaWprowadzaniaTypuDanychAdresata=4;
                 }
                 else if (linia[i]=='|' & liczebnikDlaWprowadzaniaTypuDanychAdresata==4)
                 {
-                    adresat.numerTelefonu=skladowaDanychAdresta;
+                    adresat.nazwisko=skladowaDanychAdresta;
                     skladowaDanychAdresta="";
                     liczebnikDlaWprowadzaniaTypuDanychAdresata=5;
                 }
                 else if (linia[i]=='|' & liczebnikDlaWprowadzaniaTypuDanychAdresata==5)
                 {
-                    adresat.email=skladowaDanychAdresta;
+                    adresat.numerTelefonu=skladowaDanychAdresta;
                     skladowaDanychAdresta="";
                     liczebnikDlaWprowadzaniaTypuDanychAdresata=6;
                 }
                 else if (linia[i]=='|' & liczebnikDlaWprowadzaniaTypuDanychAdresata==6)
+                {
+                    adresat.email=skladowaDanychAdresta;
+                    skladowaDanychAdresta="";
+                    liczebnikDlaWprowadzaniaTypuDanychAdresata=7;
+                }
+                else if (linia[i]=='|' & liczebnikDlaWprowadzaniaTypuDanychAdresata==7)
                 {
                     adresat.adres=skladowaDanychAdresta;
                     skladowaDanychAdresta="";
                     liczebnikDlaWprowadzaniaTypuDanychAdresata=1;
                     adresaci.push_back(adresat);
                 }
+                }
 
-            }
         }
     }
 
     ksiazkaAdresowa.close();
 
 }
-void usuwanieAdresata(vector <Adresat> &adresaci)
+void usuwanieAdresata(vector <Adresat> &adresaci, int idUzytkownika )
 {
     int idDoUsunieciaAdresata, liczbaPorzadkowaDlaUsunieciaAdresata=0;
     char potwierdzenie;
@@ -555,10 +579,14 @@ void usuwanieAdresata(vector <Adresat> &adresaci)
         else if(adresaci.size()>1)
             for(int i=0; i<=adresaci.size(); i++)
             {
-                if (adresaci[i].id==idDoUsunieciaAdresata)
+                if(adresaci[i].idOdUzytkownika==idUzytkownika)
+
+                {
+                    if (adresaci[i].id==idDoUsunieciaAdresata)
                 {
                     liczbaPorzadkowaDlaUsunieciaAdresata=i;
                     adresaci.erase(adresaci.begin()+liczbaPorzadkowaDlaUsunieciaAdresata);
+                }
                 }
             }
 
@@ -569,7 +597,7 @@ void usuwanieAdresata(vector <Adresat> &adresaci)
         // sort(adresaci.id.begin(), adresaci.id.end());
     }
 }
-void zmianaDanychAdresata(vector <Adresat> &adresaci)
+void zmianaDanychAdresata(vector <Adresat> &adresaci, int idUzytkownika)
 {
     int idDoZmianyDanychAdresata, liczbaPorzadkowaDlaZmianyDanychAdresata, zmiennaOtwierajacaMenu=0;
     char wybor;
@@ -577,11 +605,13 @@ void zmianaDanychAdresata(vector <Adresat> &adresaci)
     cin >> idDoZmianyDanychAdresata;
     for(int i=0; i<adresaci.size(); i++)
     {
-        if ( adresaci[i].id==idDoZmianyDanychAdresata)
+        if(adresaci[i].idOdUzytkownika==idUzytkownika)
+        {
+            if ( adresaci[i].id==idDoZmianyDanychAdresata)
         {
             liczbaPorzadkowaDlaZmianyDanychAdresata=i;
             zmiennaOtwierajacaMenu=1;
-            zmiennaOtwierajacaMenu=1;
+        }
         }
     }
     if (zmiennaOtwierajacaMenu!=0)
@@ -639,13 +669,13 @@ void zmianaDanychAdresata(vector <Adresat> &adresaci)
         }
 
 }
-void zmianaHaslaUzytkownika (string login, vector <Uzytkownik> &uzytkownicy)
+void zmianaHaslaUzytkownika ( vector <Uzytkownik> &uzytkownicy, int idUzytkownika)
 {
     int indeksDoZmianyHasla=0,liczebnikDlaPodawaniaHasla=0;
     string haslo, hasloDoPorownania;
     for(int i=0; i<uzytkownicy.size(); i++)
     {
-        if(uzytkownicy[i].login==login)
+        if(uzytkownicy[i].id==idUzytkownika)
         {
             indeksDoZmianyHasla=i;
         }
